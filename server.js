@@ -29,9 +29,24 @@ app.get('/', function (req, res) {
 
 app.get('/todos', function (req, res) {
     var queryParams = req.query;
-    var completed = queryParams.completed === 'true' ? true : false;
+   
+    if(queryParams.completed === undefined && queryParams.desc === undefined){
+       return  res.json(todos);
+    }
+    var filteredTodos = todos;
+    var completed, description;
+    if(queryParams.completed !== undefined){
+        completed = queryParams.completed === 'true' ? true : false;
+        filteredTodos = _.where(filteredTodos, { completed: completed });
+    }
 
-    var filteredTodos = _.where(todos, { completed: completed });
+    if(queryParams.desc !== undefined){
+        description = queryParams.desc.toLowerCase();
+        filteredTodos = _.filter(filteredTodos, function (item) {
+            return item.description.toLowerCase().indexOf(description) > -1;
+        });
+    }
+
     res.json(filteredTodos);
 });
 
