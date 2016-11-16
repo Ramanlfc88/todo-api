@@ -19,7 +19,7 @@ var todos = [{
         id: 3,
         description: "Finish breakfast",
         completed: true
-}];
+    }];
 
 app.use(bodyParser.json()); // allows us to access the user sent json data with req.body 
 
@@ -28,7 +28,11 @@ app.get('/', function (req, res) {
 });
 
 app.get('/todos', function (req, res) {
-    res.json(todos);
+    var queryParams = req.query;
+    var completed = queryParams.completed === 'true' ? true : false;
+
+    var filteredTodos = _.where(todos, { completed: completed });
+    res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function (req, res) {
@@ -50,9 +54,9 @@ app.get('/todos/:id', function (req, res) {
 });
 
 app.post('/todos', function (req, res) {
-    var body = _.pick(req.body,'description', 'completed'); // strip away overposted data
+    var body = _.pick(req.body, 'description', 'completed'); // strip away overposted data
 
-    if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
+    if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
         return res.status(400).send();
     }
 
@@ -64,30 +68,29 @@ app.post('/todos', function (req, res) {
     res.json(body);
 });
 
-app.delete('/todos/:id',function (req, res) {
+app.delete('/todos/:id', function (req, res) {
     var id = parseInt(req.params.id);
     var todo = _.findWhere(todos, { id: id });
 
-    if (todo)
-    {
+    if (todo) {
         todos = _.without(todos, todo);
         res.json(todo);
-    }else
-        res.status(400).json({"error" : "no todo found with id: " + id});
+    } else
+        res.status(400).json({ "error": "no todo found with id: " + id });
 
 });
 
 app.put('/todos/:id', function (req, res) {
-     var body = _.pick(req.body,'description', 'completed'); // strip away overposted data
-     var id = parseInt(req.params.id);
-     var todo = _.findWhere(todos, { id: id });
+    var body = _.pick(req.body, 'description', 'completed'); // strip away overposted data
+    var id = parseInt(req.params.id);
+    var todo = _.findWhere(todos, { id: id });
 
-     if(!todo){
-         return res.status(404).send();
-     }
-     todo = _.extend(todo, body);
-     
-     res.json(todo); 
+    if (!todo) {
+        return res.status(404).send();
+    }
+    todo = _.extend(todo, body);
+
+    res.json(todo);
 });
 
 app.listen(PORT, function () {
