@@ -1,7 +1,9 @@
 'use strict';
 
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
+
 var PORT = process.env.PORT || 3000;
 var todos = [{
     id: 1,
@@ -16,6 +18,8 @@ var todos = [{
         description: "Finish breakfast",
         completed: true
     }];
+
+app.use(bodyParser.json()); // allows us to access the user sent json data with req.body 
 
 app.get('/', function (req, res) {
     res.send('welcome to the todo page');
@@ -39,6 +43,16 @@ app.get('/todos/:id', function (req, res) {
         res.json(todo);
     else
         res.status(400).send();
+});
+
+app.post('/todos',function (req, res) {
+    var body =req.body;
+
+    var currentId = todos[todos.length - 1].id + 1;
+    body.id = currentId;
+    todos.push(body);
+
+    res.json(body);
 });
 
 app.listen(PORT, function () {
