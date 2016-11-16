@@ -19,7 +19,7 @@ var todos = [{
         id: 3,
         description: "Finish breakfast",
         completed: true
-    }];
+}];
 
 app.use(bodyParser.json()); // allows us to access the user sent json data with req.body 
 
@@ -62,6 +62,19 @@ app.post('/todos', function (req, res) {
     todos.push(body);
 
     res.json(body);
+});
+
+app.delete('/todos/:id',function (req, res) {
+    var id = parseInt(req.params.id);
+    var todo = _.findWhere(todos, { id: id });
+
+    if (todo)
+    {
+        todos = _.without(todos, todo);
+        res.json(todo);
+    }else
+        res.status(400).json({"error" : "no todo found with id: " + id});
+
 });
 
 app.listen(PORT, function () {
