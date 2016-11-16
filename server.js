@@ -2,7 +2,9 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('underscore');
 var app = express();
+
 
 var PORT = process.env.PORT || 3000;
 var todos = [{
@@ -31,24 +33,31 @@ app.get('/todos', function (req, res) {
 
 app.get('/todos/:id', function (req, res) {
     var id = parseInt(req.params.id);
-    var todo;
+    var todo = _.findWhere(todos, { id: id });
 
-    for (let i = 0; i < todos.length; i++) {
-        if (id === todos[i].id) {
-            todo = todos[i];
-        }
-    }// end for
-    
+
+    /*
+        for (let i = 0; i < todos.length; i++) {
+            if (id === todos[i].id) {
+                todo = todos[i];
+            }
+        }// end for
+    */
     if (todo)
         res.json(todo);
     else
         res.status(400).send();
 });
 
-app.post('/todos',function (req, res) {
-    var body =req.body;
+app.post('/todos', function (req, res) {
+    var body = _.pick(req.body,'description', 'completed'); // strip away overposted data
+
+    if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
+        return res.status(400).send();
+    }
 
     var currentId = todos[todos.length - 1].id + 1;
+    body.description = body.description.trim();
     body.id = currentId;
     todos.push(body);
 
