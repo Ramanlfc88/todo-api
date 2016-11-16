@@ -77,6 +77,19 @@ app.delete('/todos/:id',function (req, res) {
 
 });
 
+app.put('/todos/:id', function (req, res) {
+     var body = _.pick(req.body,'description', 'completed'); // strip away overposted data
+     var id = parseInt(req.params.id);
+     var todo = _.findWhere(todos, { id: id });
+
+     if(!todo){
+         return res.status(404).send();
+     }
+     todo = _.extend(todo, body);
+     
+     res.json(todo); 
+});
+
 app.listen(PORT, function () {
     console.log('server started at port:' + PORT);
 });
