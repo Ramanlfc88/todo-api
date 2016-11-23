@@ -42,7 +42,7 @@ app.get('/todos', function (req, res) {
     if (queryParams.desc !== undefined) {
         description = queryParams.desc.toLowerCase();
         where.description = {
-            $like : '%'+ description+ '%' // postgres needs ilike for case insensitive search
+            $ilike: '%' + description + '%' // postgres needs ilike for case insensitive search
         };
     }
 
@@ -109,17 +109,17 @@ app.get('/todos/:id', function (req, res) {
 
 app.post('/todos', function (req, res) {
     var body = _.pick(req.body, 'description', 'completed'); // strip away overposted data
-/*
-    if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-        return res.status(400).send();
-    }
-
-    var currentId = todos[todos.length - 1].id + 1;
-    body.description = body.description.trim();
-    body.id = currentId;
-     todos.push(body);
-      res.json(body);
-*/
+    /*
+        if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+            return res.status(400).send();
+        }
+    
+        var currentId = todos[todos.length - 1].id + 1;
+        body.description = body.description.trim();
+        body.id = currentId;
+         todos.push(body);
+          res.json(body);
+    */
     db.todo.create(body).then(function (todo) {
         res.status(200).json(todo.toJSON());
     }).catch(function (err) {
@@ -135,7 +135,7 @@ app.delete('/todos/:id', function (req, res) {
             id: id
         }
     }).then(function (rows) {
-        if(rows === 1){
+        if (rows === 1) {
             res.status(204).send();
         }
     }).catch(function (err) {
@@ -157,14 +157,31 @@ app.delete('/todos/:id', function (req, res) {
 app.put('/todos/:id', function (req, res) {
     var body = _.pick(req.body, 'description', 'completed'); // strip away overposted data
     var id = parseInt(req.params.id);
-    var todo = _.findWhere(todos, { id: id });
+    /*
+   var todo = _.findWhere(todos, { id: id });
 
     if (!todo) {
         return res.status(404).send();
     }
     todo = _.extend(todo, body);
-
     res.json(todo);
+*/
+
+    db.todo.findById(id).then(function (todo) {
+        if (todo) {
+            todo.update(body).then(function (todo) {
+                res.json(todo.toJSON());
+            }, function (err) {
+                 res.status(400).json(err);
+            });
+        } else {
+            res.status(404).send();
+        }
+    }, function () {
+         res.status(500).send();
+    });
+
+
 });
 
 db.sequelize.sync({
