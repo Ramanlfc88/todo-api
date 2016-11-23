@@ -42,7 +42,7 @@ app.get('/todos', function (req, res) {
     if (queryParams.desc !== undefined) {
         description = queryParams.desc.toLowerCase();
         where.description = {
-            $like : '%'+ description+ '%'
+            $ilike : '%'+ description+ '%' // postgres needs ilike for case insensitive search
         };
     }
 
