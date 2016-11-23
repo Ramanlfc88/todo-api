@@ -42,7 +42,7 @@ app.get('/todos', function (req, res) {
     if (queryParams.desc !== undefined) {
         description = queryParams.desc.toLowerCase();
         where.description = {
-            $ilike : '%'+ description+ '%' // postgres needs ilike for case insensitive search
+            $like : '%'+ description+ '%' // postgres needs ilike for case insensitive search
         };
     }
 
@@ -129,6 +129,20 @@ app.post('/todos', function (req, res) {
 
 app.delete('/todos/:id', function (req, res) {
     var id = parseInt(req.params.id);
+
+    db.todo.destroy({
+        where: {
+            id: id
+        }
+    }).then(function (rows) {
+        if(rows === 1){
+            res.status(204).send();
+        }
+    }).catch(function (err) {
+        console.log(err);
+        res.status(500).send();
+    });
+    /*
     var todo = _.findWhere(todos, { id: id });
 
     if (todo) {
@@ -136,6 +150,7 @@ app.delete('/todos/:id', function (req, res) {
         res.json(todo);
     } else
         res.status(400).json({ "error": "no todo found with id: " + id });
+        */
 
 });
 
