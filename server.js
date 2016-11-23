@@ -29,18 +29,18 @@ app.get('/', function (req, res) {
 
 app.get('/todos', function (req, res) {
     var queryParams = req.query;
-   
-    if(queryParams.completed === undefined && queryParams.desc === undefined){
-       return  res.json(todos);
+
+    if (queryParams.completed === undefined && queryParams.desc === undefined) {
+        return res.json(todos);
     }
     var filteredTodos = todos;
     var completed, description;
-    if(queryParams.completed !== undefined){
+    if (queryParams.completed !== undefined) {
         completed = queryParams.completed === 'true' ? true : false;
         filteredTodos = _.where(filteredTodos, { completed: completed });
     }
 
-    if(queryParams.desc !== undefined){
+    if (queryParams.desc !== undefined) {
         description = queryParams.desc.toLowerCase();
         filteredTodos = _.filter(filteredTodos, function (item) {
             return item.description.toLowerCase().indexOf(description) > -1;
@@ -52,8 +52,16 @@ app.get('/todos', function (req, res) {
 
 app.get('/todos/:id', function (req, res) {
     var id = parseInt(req.params.id);
-    var todo = _.findWhere(todos, { id: id });
+    // var todo = _.findWhere(todos, { id: id });
 
+    db.todo.findById(id).then(function (todo) {
+        if (!!todo)
+            res.status(200).json(todo.toJSON());
+        else
+            res.status(404).send();
+    }).catch(function (err) {
+        res.status(500).json(err);
+    });
 
     /*
         for (let i = 0; i < todos.length; i++) {
@@ -61,11 +69,12 @@ app.get('/todos/:id', function (req, res) {
                 todo = todos[i];
             }
         }// end for
-    */
+   
     if (todo)
         res.json(todo);
     else
         res.status(400).send();
+     */
 });
 
 app.post('/todos', function (req, res) {
@@ -78,10 +87,10 @@ app.post('/todos', function (req, res) {
     var currentId = todos[todos.length - 1].id + 1;
     body.description = body.description.trim();
     body.id = currentId;
-   // todos.push(body);
-  //  res.json(body);
+    // todos.push(body);
+    //  res.json(body);
 
-    db.todo.create(body).then(function (todo){
+    db.todo.create(body).then(function (todo) {
         res.status(200).json(todo.toJSON());
     }).catch(function (err) {
         res.status(400).json(err);
@@ -114,8 +123,8 @@ app.put('/todos/:id', function (req, res) {
 });
 
 db.sequelize.sync({
-   // force: true
-}).then(function(){
+    // force: true
+}).then(function () {
     app.listen(PORT, function () {
         console.log('server started at port:' + PORT);
     });
