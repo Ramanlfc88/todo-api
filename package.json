@@ -13,6 +13,8 @@
     "body-parser": "^1.15.2",
     "underscore": "^1.8.3",
     "sequelize" : "^3.26.0",
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.8",
+    "pg" : "4.1.1",
+    "pg-hstore": "2.3.2"
   }
 }
