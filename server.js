@@ -4,7 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var app = express();
-
+var db = require('./db');
 
 var PORT = process.env.PORT || 3000;
 var todos = [{
@@ -78,9 +78,14 @@ app.post('/todos', function (req, res) {
     var currentId = todos[todos.length - 1].id + 1;
     body.description = body.description.trim();
     body.id = currentId;
-    todos.push(body);
+   // todos.push(body);
+  //  res.json(body);
 
-    res.json(body);
+    db.todo.create(body).then(function (todo){
+        res.status(200).json(todo.toJSON());
+    }).catch(function (err) {
+        res.status(400).json(err);
+    });
 });
 
 app.delete('/todos/:id', function (req, res) {
@@ -108,6 +113,11 @@ app.put('/todos/:id', function (req, res) {
     res.json(todo);
 });
 
-app.listen(PORT, function () {
-    console.log('server started at port:' + PORT);
+db.sequelize.sync({
+   // force: true
+}).then(function(){
+    app.listen(PORT, function () {
+        console.log('server started at port:' + PORT);
+    });
 });
+
